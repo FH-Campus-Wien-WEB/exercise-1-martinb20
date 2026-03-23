@@ -6,26 +6,140 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movies!</title>
     <style>
-        /* Part 3: Your styling goes here */
-    </style>
-    <script>
-        function reverseString(s) {
-            return s.split("").reverse().join("");
+        body {
+            /* Uses the native system font (San Francisco on Mac/iOS) for a native app feel */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f5f5f7;
+            color: #1d1d1f; 
+            margin: 50px auto;
+            max-width: 900px; 
+            padding: 0 20px;
+
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* Creates exactly 2 equal-width columns */
+            gap: 40px; 
         }
 
+        article {
+            background-color: #ffffff;
+            border-radius: 24px; 
+            margin-bottom: 40px;
+            padding: 32px;
+            /* Layered shadow: one small shadow for crispness, one large for depth */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02), 0 16px 32px rgba(0, 0, 0, 0.04); 
+            transition: transform 0.3s ease, box-shadow 0.3s ease; 
+        }
+
+        /* Adds a subtle floating effect when you hover over a movie */
+        article:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03), 0 24px 48px rgba(0, 0, 0, 0.06);
+        }
+
+        h2 {
+            font-weight: 700;
+            font-size: 2em;
+            margin-top: 0;
+            margin-bottom: 20px;
+            letter-spacing: -0.02em; 
+        }
+
+        img {
+            border-radius: 12px;
+            max-width: 220px;
+            display: block;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Makes the poster pop off the card */
+        }
+
+    
+        .genre {
+            background-color: #000000; 
+            color: #b3c9b5; 
+            padding: 6px 14px;
+            border-radius: 20px; 
+            display: inline-block;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 20px;
+            letter-spacing: 0.02em;
+        }
+
+        p {
+            line-height: 1.6;
+            font-size: 1.05em;
+            color: #424245; 
+            margin-bottom: 16px;
+        }
+
+        strong {
+            font-weight: 600;
+            color: #1d1d1f; 
+        }
+    </style>
+    <script>
         window.onload = function () {
-            const xhr = new XMLHttpRequest()
+            const xhr = new XMLHttpRequest();
+            
             xhr.onload = function () {
-                const bodyElement = document.querySelector("body")
+                const bodyElement = document.querySelector("body");
+                
                 if (xhr.status == 200) {
-		            /* Part 2: Build the HTML elements here and append them to the body */ 
-                    bodyElement.append(reverseString(xhr.responseText))
+                    /* Part 2: Build the HTML elements here and append them to the body */ 
+                    
+                    // 1. Parse the JSON text into a usable JavaScript array
+                    const movies = JSON.parse(xhr.responseText);
+
+                    // 2. Loop through every movie in that array
+                    movies.forEach(movie => {
+                        // Create the main container for the movie
+                        const article = document.createElement("article");
+                        
+                        // Create and set the title
+                        const title = document.createElement("h2");
+                        title.textContent = movie.Title;
+                        
+                        // Create and set the poster image
+                        const poster = document.createElement("img");
+                        poster.src = movie.Poster;
+                        poster.alt = movie.Title + " Poster";
+                        
+                        // Create a container for the genres and loop through them
+                        const genresContainer = document.createElement("div");
+                        movie.Genres.forEach(genre => {
+                            const span = document.createElement("span");
+                            span.className = "genre"; 
+                            span.textContent = genre;
+                            genresContainer.appendChild(span);
+                        });
+
+                        // Create and set the plot description
+                        const plot = document.createElement("p");
+                        plot.textContent = movie.Plot;
+
+                        // Create a paragraph for the technical details
+                        const details = document.createElement("p");
+                        details.innerHTML = `<strong>Released:</strong> ${movie.Released} | <strong>Runtime:</strong> ${movie.Runtime} mins | <strong>Metascore:</strong> ${movie.Metascore} | <strong>IMDB:</strong> ${movie.imdbRating}`;
+                        
+                        // Create a paragraph for the cast and crew
+                        const crew = document.createElement("p");
+                        crew.innerHTML = `<strong>Directors:</strong> ${movie.Directors.join(', ')} <br> <strong>Writers:</strong> ${movie.Writers.join(', ')} <br> <strong>Actors:</strong> ${movie.Actors.join(', ')}`;
+
+                        // Attach all these pieces to the movie article container
+                        article.append(title, poster, genresContainer, details, crew, plot);
+                        
+                        // Finally, attach the completed movie article to the webpage body
+                        bodyElement.appendChild(article);
+                    });
+
                 } else {
-                    bodyElement.append("Daten konnten nicht geladen werden, Status " + xhr.status + " - " + xhr.statusText)
+                    bodyElement.append("Daten konnten nicht geladen werden, Status " + xhr.status + " - " + xhr.statusText);
                 }
             }
-            xhr.open("GET", "/movies")
-            xhr.send()
+            
+            xhr.open("GET", "/movies");
+            xhr.send();
         }
     </script>
 
